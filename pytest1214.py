@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # from wx import Bitmap, BITMAP_SCREEN_DEPTH
 # from wx import MemoryDC, NullBitmap
 from wx import Point 
@@ -20,7 +21,7 @@ class App(base.App):
     def Start(self):
 
         # create editor screen
-        self.screen = Screen(80, 50)
+        self.screen = Screen(120, 30)
 
         # refer BackgroundBitmap to bitmapBuffer
         self.Panel.BackgroundBitmap = \

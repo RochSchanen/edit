@@ -56,7 +56,7 @@ class Screen():
 
     # REFRESH BUFFER ##########################################################
 
-    _borders = 7, 5, 5, 2
+    _borders = 5, 5, 3, 3
     # _borders = 7, 1, 1, 1
 
     def drawBorders(self, dc):
@@ -90,15 +90,15 @@ class Screen():
         dc.DrawLine(x1, y1, x1, y2)
         return
 
-    # _CLEAR is too slow on windows 10 python engine
-    # _CLEAR was fine on ubuntu 20.4
-    # the code forecast the usage of a text mode where the
+    # _CLEAR is too slow on windows 10
+    # _CLEAR is fine on ubuntu 20.4
+    # the code maps to a text mode style where the
     # screen is cleared by filling it up with spaces characters
-    # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is quite
-    # a lot slower on windows 10 than linux ubuntu 20.4
+    # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is too
+    # slow on windows 10 (ok with linux ubuntu 20.4)
     # so a blankScreen buffer is build on first call to accelerate
-
-    # fix cursor trace at position 0, 0
+    # screen clear function. Also, the cursor now leaves a trace
+    # at position 0, 0 : need fixing
 
     blankScreen = None
 
@@ -188,7 +188,7 @@ class Screen():
     # X is the scrolling horizontal shift
     # we must keep X+x == c at the end of any action
 
-    _triggers = 5, 3, 5, 3
+    _triggers = 10, 10, 5, 5
     # _triggers = 10, 10, 5, 5
 
     def jumpRight(self, c):
