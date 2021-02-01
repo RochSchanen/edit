@@ -90,13 +90,32 @@ class Screen():
         dc.DrawLine(x1, y1, x1, y2)
         return
 
+    # _CLEAR is too slow on windows 10 python engine
+    # _CLEAR was fine on ubuntu 20.4
+    # the code forecast the usage of a text mode where the
+    # screen is cleared by filling it up with spaces characters
+    # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is quite
+    # a lot slower on windows 10 than linux ubuntu 20.4
+    # so a blankScreen buffer is build on first call to accelerate
+
+    # fix cursor trace at position 0, 0
+
+    blankScreen = None
+
     def _clear(self, dc):
+        # clear using blankScreen
+        if self.blankScreen:
+            dc.DrawBitmap(self.blankScreen, 0, 0)
+            return
+        # clear dc using spaces
         cw, ch = self.charSize
         cl, rw = self.screenSize
         c = self.CS.get(' ', 'nrm')
         for x in range(cl):
             for y in range(rw):
-              dc.DrawBitmap(c, x*cw, y*ch)  
+              dc.DrawBitmap(c, x*cw, y*ch)
+        # save a copy as blankScreen
+        self.blankScreen = dc.GetAsBitmap()
         # done
         return
 
@@ -727,7 +746,11 @@ class Screen():
         self._refresh()
         return
 
-    # BUILD CHARACTER BITMAP SETS #############################################
+# BUILD CHARACTER BITMAP SETS #################################################
+
+# for windows 10 : install font found in data
+# to do : make a bitmap character table that
+# can be used independently from the platform
 
 class CharacterSet():
 
@@ -749,7 +772,8 @@ class CharacterSet():
         # make character set
         self._createPrintableCharSet()
         # make font
-        self._createFont('mono', 'MonoSpace', 11)
+        # self._createFont('mono', 'MonoSpace', 11)
+        self._createFont('mono', 'Ubuntu Mono', 11)
         # make character bitmaps
         self._createCharBitmap('nrm', 'mono', 'txt', 'bgd')
         self._createCharBitmap('sel', 'mono', 'slF', 'slB')

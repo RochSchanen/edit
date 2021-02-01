@@ -39,8 +39,9 @@ class App(base.App):
 
     def onChar(self, event):
         self.screen.processChar(event)
-        self.Panel.Refresh()
+        # window 10 requires False value for refresh
+        # to prevent white blinking panel
+        self.Panel.Refresh(False)
         return
 
 App().MainLoop()
-
