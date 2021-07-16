@@ -97,8 +97,8 @@ class Screen():
     # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is too
     # slow on windows 10 (ok with linux ubuntu 20.4)
     # so a blankScreen buffer is build on first call to accelerate
-    # screen clear function. Also, the cursor now leaves a trace
-    # at position 0, 0 : need fixing
+    # screen clear function. Unfortunately, the cursor now leaves
+    # a trace at position 0, 0. This needs fixing
 
     blankScreen = None
 
@@ -203,7 +203,7 @@ class Screen():
         b = cl-(sl+sr)-tr-1 # calculate boundary
         if x > b:           # check boundary (True if crossed)
             x = b           # place cursor at the boundary
-            X = c-b         # scroll screen while respecting x+X==c
+            X = c-b         # scroll screen respecting the constraint x+X==c
             # there no limit to scrolling the screen to the right
         # done
         self.cursor = x, y
@@ -222,11 +222,11 @@ class Screen():
         b = tl              # calculate boundary
         if x < b:           # check boundary (True if crossed)
             x = b           # place cursor at the boundary
-            X = c-b         # scroll screen while respecting x+X==c
+            X = c-b         # scroll screen respecting the constraint x+X==c
             # there is a limit to scrolling the screen to the left
             if X < 0:       # scrolling cannot be negative
                 X = 0       # place scroll position at the boundary
-                x = c       # place cursor respecting x+X==c
+                x = c       # place cursor respecting the constraint x+X==c
         # done
         self.cursor = x, y
         self.scroll = X, Y
@@ -254,13 +254,13 @@ class Screen():
         cl, rw = self.screenSize
         X, Y = self.scroll
         x, y = self.cursor
-        # jump to the right at new position c
+        # jump down to row r
         y = r-Y             # new cursor pos
         b = rw-(st+sb)-tb-1 # calculate boundary
         if y > b:           # check boundary (True if crossed)
             y = b           # place cursor at the boundary
-            Y = r-b         # scroll screen while respecting y+Y==r
-            # there no limit to scrolling the screen to the right
+            Y = r-b         # scroll screen respecting the constraint y+Y==r
+            # there no limit to scrolling the screen down
         # done
         self.cursor = x, y
         self.scroll = X, Y
@@ -273,16 +273,16 @@ class Screen():
         cl, rw = self.screenSize
         X, Y = self.scroll
         x, y = self.cursor
-        # jump to the left at new position c
+        # jump up to row r
         y = r-Y             # new cursor position
         b = tt              # calculate boundary
         if y < b:           # check boundary (True if crossed)
             y = b           # place cursor at the boundary
-            Y = r-b         # scroll screen while respecting y+Y==r
-            # there is a limit to scrolling the screen to the left
+            Y = r-b         # scroll screen respecting the constraint y+Y==r
+            # there is a limit to scrolling the screen to the top
             if Y < 0:       # scrolling cannot be negative
                 Y = 0       # place scroll position at the boundary
-                y = r       # place cursor respecting y+Y==r
+                y = r       # place cursor respecting the constraint y+Y==r
         # done
         self.cursor = x, y
         self.scroll = X, Y
@@ -375,17 +375,19 @@ class Screen():
         return True
 
     def moveTop(self):
+        # go to top-left corner
         self.gotoRow(0)
         self.gotoColumn(0)
         return True
 
     def moveBottom(self):
+        # go to bottom-right corner
         l = len(self.textBuffer)
         self.gotoRow(l-1)
         self.moveEnd()
         return True
 
-    # MOVE TO NEXT WORD START OR END ##########################################
+    # MOVE TO NEXT WORD (START OR END) ########################################
 
     wordSet = ''.join([
         'abcdefghijklmnopqrstuvwxyz',
@@ -673,7 +675,7 @@ class Screen():
         return True
 
     def deleteTab(self):
-
+        # to implement
         return
 
     # PROCESS KEYBOARD INPUT CHARACTERS #######################################
@@ -750,7 +752,7 @@ class Screen():
 
 # for windows 10 : install font found in data
 # to do : make a bitmap character table that
-# can be used independently from the platform
+# can be used independently from any platform
 
 class CharacterSet():
 
@@ -773,7 +775,8 @@ class CharacterSet():
         self._createPrintableCharSet()
         # make font
         # self._createFont('mono', 'MonoSpace', 11)
-        self._createFont('mono', 'Ubuntu Mono', 11)
+        self._createFont('mono', 'Ubuntu Mono', 15)
+        # self._createFont('mono', 'Ubuntu Mono', 11)
         # make character bitmaps
         self._createCharBitmap('nrm', 'mono', 'txt', 'bgd')
         self._createCharBitmap('sel', 'mono', 'slF', 'slB')
