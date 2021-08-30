@@ -29,6 +29,7 @@ class Screen():
         self.CS = CharacterSet()
         # get character geometry
         _cw, _ch = self.CS.get(' ').GetSize()
+        print(_cw, _ch)
         # record parameters
         self.charSize = _cw, _ch 
         # create pens
@@ -119,7 +120,7 @@ class Screen():
         dc.DrawLine(x1, y1, x1, y2)
         return
 
-    blankScreen = None
+    bitmapBlank = None
 
     def _clear(self, dc):
         # clear using bitmapBlank
