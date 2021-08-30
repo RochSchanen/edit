@@ -35,14 +35,41 @@ class Screen():
         self.createSolidPen('_borders', 80, 80, 80)
         self.createSolidPen('_borderLeft', 150, 50, 50)
         self.createSolidPen('_cursor', 255, 180, 100, width = 2)
+        # define bitmap parameters
+        w, h, d = (columns+sl+sr)*_cw, (rows+st+sb)*_ch, BITMAP_SCREEN_DEPTH        
         # create screen bitmap
-        self.bitmapBuffer = Bitmap(
-            (columns+sl+sr)*_cw, (rows+st+sb)*_ch,
-            BITMAP_SCREEN_DEPTH)
+        self.bitmapBuffer = Bitmap(w, h, d)
+        # create blank bitmap (see comment for _BlankScreen)
+        self.bitmapBlank = self._BlankScreen(w, h, d)
+        # create empty buffer
         self.textBuffer = ['']
         # done
         self._refresh()
         return
+
+    # --- windows FIX ---
+    # symptoms:
+    # _CLEAR is too slow on windows 10
+    # _CLEAR is fine on ubuntu 20.4
+    # fix:
+    # the code tries to stay close to the equivalent of
+    # a video text mode style where the screen is cleared
+    # by filling it up with spacescharacters. however the
+    # dc.DrawBitmap(c, x*cw, y*ch) command seems to be
+    # slowing the out on windows 10 (it was working fine
+    # on linux ubuntu 20.4) so a bitmapBlank buffer is
+    # build to accelerate the screen _Clear method.
+    def _BlankScreen(self, w, h, d):
+        b = Bitmap(w, h, d)
+        dc = MemoryDC()
+        dc.SelectObject(b)
+        self._clear(dc)
+        dc.SelectObject(NullBitmap)
+        return b
+
+    # PENS ####################################################################
+
+    # list of pens that are easely accessible
 
     _pens = {}
 
@@ -59,6 +86,7 @@ class Screen():
     _borders = 5, 5, 3, 3
     # _borders = 7, 1, 1, 1
 
+    # (use video character?)
     def drawBorders(self, dc):
         cl, rw = self.screenSize
         sl, sr, st, sb = self._borders
@@ -76,6 +104,7 @@ class Screen():
 
     cursor = 0, 0
 
+    # (use video characters?)
     def drawCursor(self, dc):
         # get geometry
         cw, ch = self.charSize
@@ -90,32 +119,23 @@ class Screen():
         dc.DrawLine(x1, y1, x1, y2)
         return
 
-    # _CLEAR is too slow on windows 10
-    # _CLEAR is fine on ubuntu 20.4
-    # the code maps to a text mode style where the
-    # screen is cleared by filling it up with spaces characters
-    # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is too
-    # slow on windows 10 (ok with linux ubuntu 20.4)
-    # so a blankScreen buffer is build on first call to accelerate
-    # screen clear function. Also, the cursor now leaves a trace
-    # at position 0, 0 : need fixing
-
-    blankScreen = None
+    bitmapBlank = None
 
     def _clear(self, dc):
-        # clear using blankScreen
-        if self.blankScreen:
-            dc.DrawBitmap(self.blankScreen, 0, 0)
+        # clear using bitmapBlank
+        if self.bitmapBlank:
+            dc.DrawBitmap(self.bitmapBlank, 0, 0)
+            # done
             return
-        # clear dc using spaces
+        # clear dc using spaces (texture)
         cw, ch = self.charSize
         cl, rw = self.screenSize
+        # get normal space character bitmap
         c = self.CS.get(' ', 'nrm')
+        # fill screen
         for x in range(cl):
             for y in range(rw):
               dc.DrawBitmap(c, x*cw, y*ch)
-        # save a copy as blankScreen
-        self.blankScreen = dc.GetAsBitmap()
         # done
         return
 
@@ -773,7 +793,9 @@ class CharacterSet():
         self._createPrintableCharSet()
         # make font
         # self._createFont('mono', 'MonoSpace', 11)
-        self._createFont('mono', 'Ubuntu Mono', 11)
+        # self._createFont('mono', 'Ubuntu Mono', 11)
+        self._createFont('mono', 'Ac437 IBM VGA 8x16', 12)
+
         # make character bitmaps
         self._createCharBitmap('nrm', 'mono', 'txt', 'bgd')
         self._createCharBitmap('sel', 'mono', 'slF', 'slB')

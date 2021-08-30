@@ -21,21 +21,19 @@ class App(base.App):
     def Start(self):
 
         # create editor screen
-        self.screen = Screen(120, 30)
+        self.screen = Screen(80, 25)
 
-        # refer BackgroundBitmap to bitmapBuffer
+        # create handle (BackgroundBitmap) to the bitmapBuffer
         self.Panel.BackgroundBitmap = \
             self.screen.bitmapBuffer
 
         # # set default position
         # setFramePosition(self.Frame)
 
-        # bind printable character events
-        # to the screen processChar method
+        # bind character events
         self.Bind(EVT_CHAR, self.onChar)
 
         # done
-        # self.Panel.Refresh()
         return
 
     def onChar(self, event):
