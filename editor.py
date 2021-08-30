@@ -52,13 +52,13 @@ class Screen():
     # _CLEAR is too slow on windows 10
     # _CLEAR is fine on ubuntu 20.4
     # fix:
-    # the code tries to stay close to the equivalent of
-    # a video text mode style where the screen is cleared
-    # by filling it up with spacescharacters. however the
-    # dc.DrawBitmap(c, x*cw, y*ch) command seems to be
-    # slowing the out on windows 10 (it was working fine
-    # on linux ubuntu 20.4) so a bitmapBlank buffer is
-    # build to accelerate the screen _Clear method.
+    # the code tries to stay close to the emulation of
+    # a video text mode where the screen is cleared by
+    # filling it up with spacescharacters. however the
+    # dc.DrawBitmap(c, x*cw, y*ch) command is too slow
+    # on windows 10 (it was fine on linux ubuntu 20.4)
+    # so a bitmapBlank buffer is created to accelerate
+    # the screen _Clear method.
     def _BlankScreen(self, w, h, d):
         b = Bitmap(w, h, d)
         dc = MemoryDC()
@@ -118,18 +118,6 @@ class Screen():
         # draw cursor line
         dc.DrawLine(x1, y1, x1, y2)
         return
-
-    bitmapBlank = None
-
-    # _CLEAR is too slow on windows 10
-    # _CLEAR is fine on ubuntu 20.4
-    # the code maps to a text mode style where the
-    # screen is cleared by filling it up with spaces characters
-    # howwever the dc.DrawBitmap(c, x*cw, y*ch) command is too
-    # slow on windows 10 (ok with linux ubuntu 20.4)
-    # so a blankScreen buffer is build on first call to accelerate
-    # screen clear function. Unfortunately, the cursor now leaves
-    # a trace at position 0, 0. This needs fixing
 
     blankScreen = None
 
